@@ -34,8 +34,8 @@ typedef double f64;
 // Thanks TheCherno!
 #define BIT(x) (1 << x)
 
-#define GBP_EXPAND_MACRO(x) x
-#define GBP_STRINGIFY_MACRO(x) #x
+#define VKE_EXPAND_MACRO(x) x
+#define VKE_STRINGIFY_MACRO(x) #x
 
 //----SYSTEM INFO----
 #if defined(_WIN32) || defined(_WIN64)
@@ -43,12 +43,12 @@ typedef double f64;
 #define VKP_PLATFORM "WINDOWS"
 
 #elif defined(__linux__)
-#define GBP_LINUX
-#define GBP_PLATFORM "LINUX"
+#define VKE_LINUX
+#define VKE_PLATFORM "LINUX"
 
 #elif defined(__APPLE__) && defined(__MACH__)
-#define GBP_MACOS
-#define GBP_PLATFORM "MACOS"
+#define VKE_MACOS
+#define VKE_PLATFORM "MACOS"
 
 #else
 #error UNKNOWN_PLATFORM

@@ -1,13 +1,15 @@
+#include "Core/Application.hpp"
 #include <core.hpp>
 
-#include <GLFW/glfw3.h>
+#include <Core/Window.hpp>
 
 int main()
 {
-    GBP::Log::Init();
+    VKE::Log::Init();
 
-    glm::vec3 testVec = glm::vec3({ 69.0, 420.0, 42069 });
-    GBP_INFO("Hello, World");
-    GBP_INFO("    - GLFW Compiles and Links");
-    GBP_INFO("    - GLM Compiles and Links");
+    VKE::Application::init("TestApp", 1280, 720);
+    VKE::Ref<VKE::Application> app = VKE::Application::getApp();
+    app->run();
+
+    VKE_INFO("Hello, World");
 }

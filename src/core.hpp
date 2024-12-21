@@ -1,5 +1,5 @@
-#ifndef GBP_COREH
-#define GBP_COREH
+#ifndef VKE_COREH
+#define VKE_COREH
 #include <algorithm>
 #include <filesystem>
 #include <functional>
@@ -27,7 +27,7 @@
 
 using Hash = u64;
 
-namespace GBP {
+namespace VKE {
 
 template <typename T, typename Y>
 using UMap = std::unordered_map<T, Y>;
@@ -60,27 +60,27 @@ constexpr Ref<T> CreateRef(Args&&... args)
 
 //--ASSERTIONS-- Again. Thanks TheCherno
 
-#if defined(GBP_WINDOWS)
-#define GBP_DEBUGBREAK() __debugbreak()
-#elif defined(GBP_LINUX)
+#if defined(VKE_WINDOWS)
+#define VKE_DEBUGBREAK() __debugbreak()
+#elif defined(VKE_LINUX)
 #include <signal.h>
-#define GBP_DEBUGBREAK() raise(SIGTRAP)
+#define VKE_DEBUGBREAK() raise(SIGTRAP)
 #endif
 
-#define GBP_INTERNAL_ASSERT_IMPL(type, check, msg, ...) \
+#define VKE_INTERNAL_ASSERT_IMPL(type, check, msg, ...) \
     {                                                   \
         if (!(check)) {                                 \
-            GBP##type##ERROR(msg, __VA_ARGS__);         \
-            GBP_DEBUGBREAK();                           \
+            VKE##type##ERROR(msg, __VA_ARGS__);         \
+            VKE_DEBUGBREAK();                           \
         }                                               \
     }
-#define GBP_INTERNAL_ASSERT_WITH_MSG(type, check, ...) GBP_INTERNAL_ASSERT_IMPL(type, check, "Assertion failed: {0}", __VA_ARGS__)
-#define GBP_INTERNAL_ASSERT_NO_MSG(type, check) GBP_INTERNAL_ASSERT_IMPL(type, check, "Assertion '{0}' failed at {1}:{2}", GBP_STRINGIFY_MACRO(check), std::filesystem::path(__FILE__).filename().string(), __LINE__)
-#define GBP_INTERNAL_ASSERT_GET_MACRO_NAME(arg1, arg2, macro, ...) macro
-#define GBP_INTERNAL_ASSERT_GET_MACRO(...) GBP_EXPAND_MACRO(GBP_INTERNAL_ASSERT_GET_MACRO_NAME(__VA_ARGS__, GBP_INTERNAL_ASSERT_WITH_MSG, GBP_INTERNAL_ASSERT_NO_MSG))
+#define VKE_INTERNAL_ASSERT_WITH_MSG(type, check, ...) VKE_INTERNAL_ASSERT_IMPL(type, check, "Assertion failed: {0}", __VA_ARGS__)
+#define VKE_INTERNAL_ASSERT_NO_MSG(type, check) VKE_INTERNAL_ASSERT_IMPL(type, check, "Assertion '{0}' failed at {1}:{2}", VKE_STRINGIFY_MACRO(check), std::filesystem::path(__FILE__).filename().string(), __LINE__)
+#define VKE_INTERNAL_ASSERT_GET_MACRO_NAME(arg1, arg2, macro, ...) macro
+#define VKE_INTERNAL_ASSERT_GET_MACRO(...) VKE_EXPAND_MACRO(VKE_INTERNAL_ASSERT_GET_MACRO_NAME(__VA_ARGS__, VKE_INTERNAL_ASSERT_WITH_MSG, VKE_INTERNAL_ASSERT_NO_MSG))
 
 // Currently accepts at least the condition and one additional parameter (the message) being optional
-#define GBP_ASSERT(...) GBP_EXPAND_MACRO(GBP_INTERNAL_ASSERT_GET_MACRO(__VA_ARGS__)(_, __VA_ARGS__))
-#define GBP_CORE_ASSERT(...) GBP_EXPAND_MACRO(GBP_INTERNAL_ASSERT_GET_MACRO(__VA_ARGS__)(_CORE_, __VA_ARGS__))
+#define VKE_ASSERT(...) VKE_EXPAND_MACRO(VKE_INTERNAL_ASSERT_GET_MACRO(__VA_ARGS__)(_, __VA_ARGS__))
+#define VKE_CORE_ASSERT(...) VKE_EXPAND_MACRO(VKE_INTERNAL_ASSERT_GET_MACRO(__VA_ARGS__)(_CORE_, __VA_ARGS__))
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef GBP_LOGH
-#define GBP_LOGH
+#ifndef VKE_LOGH
+#define VKE_LOGH
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
@@ -10,7 +10,7 @@
 // #include <fmt/format.h>
 #include <glm/glm.hpp>
 
-namespace GBP {
+namespace VKE {
 
 class Log {
 public:
@@ -43,9 +43,9 @@ inline OStream& operator<<(OStream& os, glm::qua<T, Q> quaternion)
 }
 
 // Core log macros
-#define GBP_TRACE(...) GBP::Log::GetCoreLogger()->trace(__VA_ARGS__);
-#define GBP_INFO(...) GBP::Log::GetCoreLogger()->info(__VA_ARGS__);
-#define GBP_WARN(...) GBP::Log::GetCoreLogger()->warn(__VA_ARGS__);
-#define GBP_ERROR(...) GBP::Log::GetCoreLogger()->error(__VA_ARGS__);
-#define GBP_CRITICAL(...) GBP::Log::GetCoreLogger()->critical(__VA_ARGS__);
+#define VKE_TRACE(...) VKE::Log::GetCoreLogger()->trace(__VA_ARGS__);
+#define VKE_INFO(...) VKE::Log::GetCoreLogger()->info(__VA_ARGS__);
+#define VKE_WARN(...) VKE::Log::GetCoreLogger()->warn(__VA_ARGS__);
+#define VKE_ERROR(...) VKE::Log::GetCoreLogger()->error(__VA_ARGS__);
+#define VKE_CRITICAL(...) VKE::Log::GetCoreLogger()->critical(__VA_ARGS__);
 #endif
