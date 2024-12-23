@@ -14,7 +14,7 @@ public:
     static void run();
 
     static Window& getWindow() { return getApp()->m_Window; }
-    static VKContext& getContext() { return getApp()->m_Context; };
+    static VKContext& getVulkanContext() { return getApp()->m_Context; };
 
     static void stopEngine() { getApp()->m_Running = false; }
 

@@ -115,13 +115,12 @@ namespace Utils {
 }
 
 VKContext::VKContext(const std::string& name)
-    : m_Name(name)
 {
     VKE_INFO("Context Initialized");
     createInstance();
     setupValidationMsger();
-    m_Device.init(m_Instance);
-}
+    m_PhysicalDevice = CreateRef<VulkanPhysicalDevice>(m_VulkanInstance);
+};
 
 void VKContext::createInstance()
 {
@@ -176,10 +175,10 @@ void VKContext::createInstance()
         instanceInfo.pNext = nullptr;
     }
 
-    VkResult result = vkCreateInstance(&instanceInfo, nullptr, m_Instance.get());
+    VkResult result = vkCreateInstance(&instanceInfo, nullptr, &m_VulkanInstance);
     VKE_ASSERT(result == VK_SUCCESS, "Failed to create instace")
     pushCleanupFunc([&]() {
-        vkDestroyInstance(*m_Instance, nullptr);
+        vkDestroyInstance(m_VulkanInstance, nullptr);
     });
 }
 
@@ -191,9 +190,9 @@ void VKContext::setupValidationMsger()
     VkDebugUtilsMessengerCreateInfoEXT createInfo {};
     Utils::populateDebugMessengerCreateInfo(createInfo);
 
-    VKE_ASSERT(Utils::createDebugUtilsMessengerEXT(*m_Instance, &createInfo, nullptr, &m_DebugMessenger) == VK_SUCCESS, "Failed to create debugCallback");
+    VKE_ASSERT(Utils::createDebugUtilsMessengerEXT(m_VulkanInstance, &createInfo, nullptr, &m_DebugMessenger) == VK_SUCCESS, "Failed to create debugCallback");
 
-    pushCleanupFunc([&]() { Utils::destroyDebugUtilsMessengerEXT(*m_Instance, m_DebugMessenger, nullptr); });
+    pushCleanupFunc([&]() { Utils::destroyDebugUtilsMessengerEXT(m_VulkanInstance, m_DebugMessenger, nullptr); });
 }
 
 void VKContext::update()

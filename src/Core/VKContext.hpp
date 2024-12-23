@@ -5,7 +5,6 @@
 #include <vulkan/vulkan.h>
 
 namespace VKE {
-
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
@@ -22,9 +21,11 @@ public:
     VKContext(const std::string& name);
     ~VKContext() { cleanup(); };
 
+    void init();
+
     void pushCleanupFunc(std::function<void()> func) { m_CleanupFunctions.push(func); };
 
-    Ref<VkInstance> getInstance() { return m_Instance; }
+    VkInstance& getVulkanInstance() { return m_VulkanInstance; }
 
     void update();
 
@@ -39,9 +40,9 @@ private:
 
     std::stack<std::function<void()>> m_CleanupFunctions;
 
-    Ref<VkInstance> m_Instance = CreateRef<VkInstance>();
+    VkInstance m_VulkanInstance;
 
-    VKEDevice m_Device;
+    Ref<VulkanPhysicalDevice> m_PhysicalDevice = nullptr;
 
     VkDebugUtilsMessengerEXT m_DebugMessenger;
 
