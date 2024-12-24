@@ -19,6 +19,8 @@ namespace Utils {
 
 }
 
+// ================ PHYSICAL DEVICE =======================
+
 VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance& instance)
 {
     pickPhysicalDevice(instance);
@@ -79,9 +81,7 @@ void VulkanPhysicalDevice::pickPhysicalDevice(VkInstance& instance)
     vkGetPhysicalDeviceFeatures(m_Physical, &m_DeviceFeatures);
 
     VKE_INFO("PHYSICAL DEVICE: ")
-    VKE_INFO("     {0}", m_DeviceProps.deviceName)
-    // VKE_INFO("     {}")
-    // VKE_INFO("    {}")
+    VKE_INFO("  {0}", m_DeviceProps.deviceName)
 
     u32 queueFamCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(m_Physical, &queueFamCount, nullptr);
@@ -89,6 +89,16 @@ void VulkanPhysicalDevice::pickPhysicalDevice(VkInstance& instance)
     vkGetPhysicalDeviceQueueFamilyProperties(m_Physical, &queueFamCount, m_QueueFamilyProps.data());
 
     getQueueFamilyIndicies(&m_QueueFamilyIndicies, VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT);
+}
+
+// ================ LOGICAL DEVICE =====================
+
+VulkanDevice::VulkanDevice(const Ref<VulkanPhysicalDevice> physicalDevice)
+{
+}
+
+VulkanDevice::~VulkanDevice()
+{
 }
 
 }
