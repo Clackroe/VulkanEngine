@@ -1,0 +1,11 @@
+[17:53:35] [info] VKE: Context Initialized
+[17:53:35] [info] VKE: Extensions GLFW: 
+[17:53:35] [info] VKE: Extensions: 
+[17:53:35] [info] VKE:     VK_EXT_debug_utils
+[17:53:35] [warning] VKE: VALIDATION: terminator_CreateInstance: Failed to CreateInstance in ICD 1.  Skipping ICD.
+[17:53:35] [info] VKE: Physical Device Found!
+[17:53:35] [info] VKE: PHYSICAL DEVICE: 
+[17:53:35] [info] VKE:      NVIDIA GeForce RTX 2060 with Max-Q Design
+[17:53:35] [info] VKE: Window Initialized
+[17:53:35] [info] VKE: Input System Initialized: 
+[17:53:36] [info] VKE: Hello, World

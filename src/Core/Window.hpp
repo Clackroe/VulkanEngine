@@ -11,6 +11,8 @@ namespace VKE {
 class Window {
 
 public:
+    Window() = default;
+
     Window(const std::string& name, u32 width, u32 height);
     ~Window()
     {

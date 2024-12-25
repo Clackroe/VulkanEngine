@@ -1,3 +1,5 @@
+#include "Core/VKDevice.hpp"
+#include "Core/VKSwapChain.hpp"
 #include "GLFW/glfw3.h"
 #include "core.hpp"
 #include <Core/VKContext.hpp>
@@ -114,13 +116,17 @@ namespace Utils {
     }
 }
 
-VKContext::VKContext(const std::string& name)
+VKContext::VKContext(const std::string& name) {};
+
+void VKContext::init()
 {
-    VKE_INFO("Context Initialized");
     createInstance();
     setupValidationMsger();
     m_PhysicalDevice = CreateRef<VulkanPhysicalDevice>(m_VulkanInstance);
-};
+    m_Device = CreateRef<VulkanDevice>(m_PhysicalDevice);
+    m_Swapchain = CreateRef<VulkanSwapchain>(m_VulkanInstance);
+    VKE_INFO("Context Initialized");
+}
 
 void VKContext::createInstance()
 {
@@ -177,7 +183,7 @@ void VKContext::createInstance()
 
     VkResult result = vkCreateInstance(&instanceInfo, nullptr, &m_VulkanInstance);
     VKE_ASSERT(result == VK_SUCCESS, "Failed to create instace")
-    pushCleanupFunc([&]() {
+    VKContext::pushCleanupFunc([&]() {
         vkDestroyInstance(m_VulkanInstance, nullptr);
     });
 }
@@ -192,7 +198,7 @@ void VKContext::setupValidationMsger()
 
     VKE_ASSERT(Utils::createDebugUtilsMessengerEXT(m_VulkanInstance, &createInfo, nullptr, &m_DebugMessenger) == VK_SUCCESS, "Failed to create debugCallback");
 
-    pushCleanupFunc([&]() { Utils::destroyDebugUtilsMessengerEXT(m_VulkanInstance, m_DebugMessenger, nullptr); });
+    VKContext::pushCleanupFunc([&]() { Utils::destroyDebugUtilsMessengerEXT(m_VulkanInstance, m_DebugMessenger, nullptr); });
 }
 
 void VKContext::update()

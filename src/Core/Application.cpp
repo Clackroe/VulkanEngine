@@ -5,9 +5,7 @@ namespace VKE {
 
 Ref<Application> Application::m_Instance = nullptr;
 
-Application::Application(const std::string& name, u32 width, u32 height)
-    : m_Window(name, width, height)
-    , m_Context(name)
+Application::Application()
 {
 }
 
@@ -15,7 +13,7 @@ void Application::run()
 {
     auto app = getApp();
     while (app->m_Running) {
-        app->m_Window.pollEnvents();
+        app->m_Window->pollEnvents();
         if (Input::isKeyDown(Key::Escape)) {
             stopEngine();
         }
@@ -25,7 +23,10 @@ void Application::run()
 void Application::init(const std::string& name, u32 width, u32 height)
 {
     if (!m_Instance) {
-        m_Instance = CreateRef<Application>(name, width, height);
+        m_Instance = CreateRef<Application>();
+        m_Instance->m_Window = CreateRef<Window>(name, width, height);
+        m_Instance->m_Context = CreateRef<VKContext>(name);
+        m_Instance->m_Context->init();
         Input::Init();
     }
 }

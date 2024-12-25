@@ -19,10 +19,13 @@ public:
     const VkPhysicalDeviceProperties& getProps() const { return m_DeviceProps; }
     const VkPhysicalDeviceFeatures& getFeats() const { return m_DeviceFeatures; }
 
+    const QueueFamilyIndicies& getQueueIndices() const { return m_QueueFamilyIndicies; };
+    const VkPhysicalDevice& getVulkanPhysical() const { return m_Physical; };
+
 private:
     void pickPhysicalDevice(VkInstance& instance);
 
-    void getQueueFamilyIndicies(QueueFamilyIndicies* indicies, int requestedTypes);
+    void findQueueFamilyIndicies(QueueFamilyIndicies* indicies, int requestedTypes);
 
 private:
     VkPhysicalDevice m_Physical = VK_NULL_HANDLE;
@@ -43,8 +46,16 @@ public:
     const VkPhysicalDeviceProperties& getDeviceProps() const { return m_Physical->getProps(); }
     const VkPhysicalDeviceFeatures& getDeviceFeats() const { return m_Physical->getFeats(); }
 
+    const VkQueue& getGraphicsQueue() const { return m_Queues[0]; }
+    const VkQueue& getComputeQueue() const { return m_Queues[1]; }
+    const VkQueue& getTransferQueue() const { return m_Queues[3]; }
+
 private:
     Ref<VulkanPhysicalDevice> m_Physical = nullptr;
+    VkDevice m_Device = VK_NULL_HANDLE;
+
+    std::vector<VkDeviceQueueCreateInfo> m_QueueCreateInfos; // Graphics, Compute, Transfer
+    std::vector<VkQueue> m_Queues; // Graphics, Compute, Transfer
 };
 
 }

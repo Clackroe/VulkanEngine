@@ -1,5 +1,6 @@
 #ifndef VKE_CONTEXT
 #define VKE_CONTEXT
+#include "Core/VKSwapChain.hpp"
 #include <Core/VKDevice.hpp>
 #include <core.hpp>
 #include <vulkan/vulkan.h>
@@ -18,14 +19,16 @@ const bool enableValidationLayers = true;
 class VKContext {
 
 public:
+    VKContext() = default;
     VKContext(const std::string& name);
     ~VKContext() { cleanup(); };
 
     void init();
 
-    void pushCleanupFunc(std::function<void()> func) { m_CleanupFunctions.push(func); };
+    static void pushCleanupFunc(std::function<void()> func) { m_CleanupFunctions.push(func); };
 
     VkInstance& getVulkanInstance() { return m_VulkanInstance; }
+    VulkanPhysicalDevice& getPhysicalDevice() { return *m_PhysicalDevice; }
 
     void update();
 
@@ -38,15 +41,17 @@ private:
 private:
     std::string m_Name;
 
-    std::stack<std::function<void()>> m_CleanupFunctions;
+    inline static std::stack<std::function<void()>> m_CleanupFunctions;
 
     VkInstance m_VulkanInstance;
 
     Ref<VulkanPhysicalDevice> m_PhysicalDevice = nullptr;
+    Ref<VulkanDevice> m_Device = nullptr;
 
     VkDebugUtilsMessengerEXT m_DebugMessenger;
 
     // Swapchain
+    Ref<VulkanSwapchain> m_Swapchain = nullptr;
     //
     // Device
 };

@@ -13,16 +13,16 @@ public:
 
     static void run();
 
-    static Window& getWindow() { return getApp()->m_Window; }
-    static VKContext& getVulkanContext() { return getApp()->m_Context; };
+    static Window& getWindow() { return *getApp()->m_Window; }
+    static VKContext& getVulkanContext() { return *getApp()->m_Context; };
 
     static void stopEngine() { getApp()->m_Running = false; }
 
-    Application(const std::string& name, u32 width, u32 height);
+    Application();
 
 private:
-    VKContext m_Context;
-    Window m_Window;
+    Ref<VKContext> m_Context = nullptr;
+    Ref<Window> m_Window = nullptr;
 
     static Ref<Application> m_Instance;
 

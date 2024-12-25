@@ -30,7 +30,7 @@ VulkanPhysicalDevice::~VulkanPhysicalDevice()
 {
 }
 
-void VulkanPhysicalDevice::getQueueFamilyIndicies(QueueFamilyIndicies* indicies, int requestedTypes)
+void VulkanPhysicalDevice::findQueueFamilyIndicies(QueueFamilyIndicies* indicies, int requestedTypes)
 {
     if (requestedTypes & VK_QUEUE_GRAPHICS_BIT) {
         for (u32 i = 0; i < m_QueueFamilyProps.size(); i++) {
@@ -88,13 +88,73 @@ void VulkanPhysicalDevice::pickPhysicalDevice(VkInstance& instance)
     m_QueueFamilyProps.resize(queueFamCount);
     vkGetPhysicalDeviceQueueFamilyProperties(m_Physical, &queueFamCount, m_QueueFamilyProps.data());
 
-    getQueueFamilyIndicies(&m_QueueFamilyIndicies, VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT);
+    findQueueFamilyIndicies(&m_QueueFamilyIndicies, VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT);
 }
 
 // ================ LOGICAL DEVICE =====================
 
 VulkanDevice::VulkanDevice(const Ref<VulkanPhysicalDevice> physicalDevice)
 {
+    m_Physical = physicalDevice;
+    m_QueueCreateInfos.resize(3);
+
+    auto& indices = m_Physical->getQueueIndices();
+
+    float queuePriority = 1.0f;
+    if (indices.graphics != -1) {
+        VkDeviceQueueCreateInfo& qInfo = m_QueueCreateInfos[0];
+        qInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        qInfo.queueFamilyIndex = indices.graphics;
+        qInfo.queueCount = 1;
+        qInfo.pQueuePriorities = &queuePriority;
+    }
+    if (indices.compute != -1) {
+        VkDeviceQueueCreateInfo& qInfo = m_QueueCreateInfos[1];
+        qInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        qInfo.queueFamilyIndex = indices.compute;
+        qInfo.queueCount = 1;
+        qInfo.pQueuePriorities = &queuePriority;
+    }
+    if (indices.transfer != -1) {
+        VkDeviceQueueCreateInfo& qInfo = m_QueueCreateInfos[2];
+        qInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        qInfo.queueFamilyIndex = indices.transfer;
+        qInfo.queueCount = 1;
+        qInfo.pQueuePriorities = &queuePriority;
+    }
+
+    VkDeviceCreateInfo createInfo {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.queueCreateInfoCount = m_QueueCreateInfos.size();
+    createInfo.pQueueCreateInfos = m_QueueCreateInfos.data();
+
+    createInfo.pEnabledFeatures = &m_Physical->getFeats();
+
+    createInfo.enabledExtensionCount = 0;
+
+    if (enableValidationLayers) {
+        createInfo.enabledLayerCount = (u32)(validationLayers.size());
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+    } else {
+        createInfo.enabledLayerCount = 0;
+    }
+
+    VkResult res = vkCreateDevice(m_Physical->getVulkanPhysical(), &createInfo, nullptr, &m_Device);
+    VKE_ASSERT(res == VK_SUCCESS, "Failed to create Vulkan Logical Device")
+    VKE_INFO("Created Logical Device");
+
+    VKContext::pushCleanupFunc([=]() { vkDestroyDevice(m_Device, nullptr); });
+
+    m_Queues.resize(3);
+    if (indices.graphics != -1) {
+        vkGetDeviceQueue(m_Device, indices.graphics, 0, &m_Queues[0]);
+    }
+    if (indices.compute != -1) {
+        vkGetDeviceQueue(m_Device, indices.compute, 0, &m_Queues[1]);
+    }
+    if (indices.transfer != -1) {
+        vkGetDeviceQueue(m_Device, indices.transfer, 0, &m_Queues[2]);
+    }
 }
 
 VulkanDevice::~VulkanDevice()
