@@ -6,6 +6,27 @@ namespace VKE {
 
 namespace Utils {
 
+    const std::vector<const char*> deviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
+
+    bool checkDeviceExtensionSupport(VkPhysicalDevice device)
+    {
+        uint32_t extensionCount;
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+        std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+        std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+        for (const auto& extension : availableExtensions) {
+            requiredExtensions.erase(extension.extensionName);
+        }
+
+        return requiredExtensions.empty();
+    }
+
     bool isDeviceSuitable(VkPhysicalDevice device)
     {
         VkPhysicalDeviceProperties props;
@@ -14,7 +35,9 @@ namespace Utils {
         VkPhysicalDeviceFeatures feats;
         vkGetPhysicalDeviceFeatures(device, &feats);
 
-        return props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+        bool extensionsSupported = checkDeviceExtensionSupport(device);
+
+        return props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && extensionsSupported;
     }
 
 }
@@ -58,6 +81,11 @@ void VulkanPhysicalDevice::findQueueFamilyIndicies(QueueFamilyIndicies* indicies
     }
 }
 
+void VulkanPhysicalDevice::setPresentQueue(u32 index)
+{
+    m_QueueFamilyIndicies.present = index;
+};
+
 void VulkanPhysicalDevice::pickPhysicalDevice(VkInstance& instance)
 {
     u32 devCount = 0;
@@ -96,41 +124,50 @@ void VulkanPhysicalDevice::pickPhysicalDevice(VkInstance& instance)
 VulkanDevice::VulkanDevice(const Ref<VulkanPhysicalDevice> physicalDevice)
 {
     m_Physical = physicalDevice;
-    m_QueueCreateInfos.resize(3);
 
     auto& indices = m_Physical->getQueueIndices();
 
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    queueCreateInfos.resize(3);
     float queuePriority = 1.0f;
     if (indices.graphics != -1) {
-        VkDeviceQueueCreateInfo& qInfo = m_QueueCreateInfos[0];
+        VkDeviceQueueCreateInfo& qInfo = queueCreateInfos[0];
         qInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         qInfo.queueFamilyIndex = indices.graphics;
         qInfo.queueCount = 1;
         qInfo.pQueuePriorities = &queuePriority;
     }
     if (indices.compute != -1) {
-        VkDeviceQueueCreateInfo& qInfo = m_QueueCreateInfos[1];
+        VkDeviceQueueCreateInfo& qInfo = queueCreateInfos[1];
         qInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         qInfo.queueFamilyIndex = indices.compute;
         qInfo.queueCount = 1;
         qInfo.pQueuePriorities = &queuePriority;
     }
     if (indices.transfer != -1) {
-        VkDeviceQueueCreateInfo& qInfo = m_QueueCreateInfos[2];
+        VkDeviceQueueCreateInfo& qInfo = queueCreateInfos[2];
         qInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         qInfo.queueFamilyIndex = indices.transfer;
+        qInfo.queueCount = 1;
+        qInfo.pQueuePriorities = &queuePriority;
+    }
+    if (indices.present != -1) {
+        VkDeviceQueueCreateInfo& qInfo = queueCreateInfos[3];
+        qInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        qInfo.queueFamilyIndex = indices.present;
         qInfo.queueCount = 1;
         qInfo.pQueuePriorities = &queuePriority;
     }
 
     VkDeviceCreateInfo createInfo {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.queueCreateInfoCount = m_QueueCreateInfos.size();
-    createInfo.pQueueCreateInfos = m_QueueCreateInfos.data();
+    createInfo.queueCreateInfoCount = queueCreateInfos.size();
+    createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
     createInfo.pEnabledFeatures = &m_Physical->getFeats();
 
-    createInfo.enabledExtensionCount = 0;
+    createInfo.enabledExtensionCount = Utils::deviceExtensions.size();
+    createInfo.ppEnabledExtensionNames = Utils::deviceExtensions.data();
 
     if (enableValidationLayers) {
         createInfo.enabledLayerCount = (u32)(validationLayers.size());
@@ -145,7 +182,6 @@ VulkanDevice::VulkanDevice(const Ref<VulkanPhysicalDevice> physicalDevice)
 
     VKContext::pushCleanupFunc([=]() { vkDestroyDevice(m_Device, nullptr); });
 
-    m_Queues.resize(3);
     if (indices.graphics != -1) {
         vkGetDeviceQueue(m_Device, indices.graphics, 0, &m_Queues[0]);
     }
@@ -154,6 +190,11 @@ VulkanDevice::VulkanDevice(const Ref<VulkanPhysicalDevice> physicalDevice)
     }
     if (indices.transfer != -1) {
         vkGetDeviceQueue(m_Device, indices.transfer, 0, &m_Queues[2]);
+    }
+    if (indices.present != -1) {
+        vkGetDeviceQueue(m_Device, indices.present, 0, &m_Queues[3]);
+    } else {
+        VKE_WARN("No Present Queue Index provided. Are you sure your device supports presentation?")
     }
 }
 

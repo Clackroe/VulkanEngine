@@ -13,7 +13,6 @@ public:
 
 private:
     VkSurfaceKHR m_Surface;
-    u32 m_QueueNodeIndex;
 };
 
 }

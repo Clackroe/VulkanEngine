@@ -17,21 +17,16 @@ VulkanSwapchain::VulkanSwapchain(const VkInstance& instance)
 
     VulkanPhysicalDevice& pDevice = Application::getVulkanContext().getPhysicalDevice();
 
-    uint32_t queueCount;
-    vkGetPhysicalDeviceQueueFamilyProperties(pDevice.getVulkanPhysical(), &queueCount, NULL);
-    VKE_ASSERT(queueCount >= 1);
+    std::vector<VkQueueFamilyProperties> queueProps = pDevice.getQueueFamilyProps();
 
-    std::vector<VkQueueFamilyProperties> queueProps(queueCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(pDevice.getVulkanPhysical(), &queueCount, queueProps.data());
-
-    std::vector<VkBool32> supportsPresent(queueCount);
+    std::vector<VkBool32> supportsPresent(queueProps.size());
     for (u32 i = 0; i < queueProps.size(); i++) {
         vkGetPhysicalDeviceSurfaceSupportKHR(pDevice.getVulkanPhysical(), i, m_Surface, &supportsPresent[i]);
     }
 
     uint32_t graphicsQueueNodeIndex = UINT32_MAX;
     uint32_t presentQueueNodeIndex = UINT32_MAX;
-    for (uint32_t i = 0; i < queueCount; i++) {
+    for (uint32_t i = 0; i < queueProps.size(); i++) {
         if ((queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
             if (graphicsQueueNodeIndex == UINT32_MAX) {
                 graphicsQueueNodeIndex = i;
@@ -45,7 +40,7 @@ VulkanSwapchain::VulkanSwapchain(const VkInstance& instance)
         }
     }
     if (presentQueueNodeIndex == UINT32_MAX) {
-        for (uint32_t i = 0; i < queueCount; ++i) {
+        for (uint32_t i = 0; i < queueProps.size(); ++i) {
             if (supportsPresent[i] == VK_TRUE) {
                 presentQueueNodeIndex = i;
                 break;
@@ -56,7 +51,7 @@ VulkanSwapchain::VulkanSwapchain(const VkInstance& instance)
     VKE_ASSERT(graphicsQueueNodeIndex != UINT32_MAX);
     VKE_ASSERT(presentQueueNodeIndex != UINT32_MAX);
 
-    m_QueueNodeIndex = graphicsQueueNodeIndex;
+    pDevice.setPresentQueue(presentQueueNodeIndex);
 }
 
 VulkanSwapchain::~VulkanSwapchain()

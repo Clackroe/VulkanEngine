@@ -10,7 +10,7 @@
 
 namespace VKE {
 
-const std::vector<const char*> wantedExtensions = {};
+const std::vector<const char*> wantedInstanceExtensions = {};
 
 namespace Utils {
 
@@ -109,7 +109,7 @@ namespace Utils {
         if (enableValidationLayers) {
             extenstions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
-        for (auto t : wantedExtensions) {
+        for (auto t : wantedInstanceExtensions) {
             extenstions.push_back(t);
         }
         return extenstions;
@@ -123,8 +123,8 @@ void VKContext::init()
     createInstance();
     setupValidationMsger();
     m_PhysicalDevice = CreateRef<VulkanPhysicalDevice>(m_VulkanInstance);
-    m_Device = CreateRef<VulkanDevice>(m_PhysicalDevice);
     m_Swapchain = CreateRef<VulkanSwapchain>(m_VulkanInstance);
+    m_Device = CreateRef<VulkanDevice>(m_PhysicalDevice);
     VKE_INFO("Context Initialized");
 }
 

@@ -6,6 +6,11 @@
 #include <vulkan/vulkan.h>
 
 namespace VKE {
+
+namespace Utils {
+    std::vector<const char*> getReqExt();
+}
+
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
