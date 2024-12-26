@@ -93,7 +93,7 @@ namespace Utils {
         return true;
     }
 
-    std::vector<const char*> getReqExt()
+    std::vector<const char*> getReqInstanceExt()
     {
         u32 glfwExtensionCount = 0;
         const char** glfwExtensions;
@@ -161,7 +161,7 @@ void VKContext::createInstance()
     reqExtensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
 
-    auto extenstions = Utils::getReqExt();
+    auto extenstions = Utils::getReqInstanceExt();
     instanceInfo.enabledExtensionCount = (u32)extenstions.size();
     instanceInfo.ppEnabledExtensionNames = extenstions.data();
     VKE_INFO("Extensions: ")
