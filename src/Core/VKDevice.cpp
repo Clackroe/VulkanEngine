@@ -46,6 +46,7 @@ namespace Utils {
 
 VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance& instance)
 {
+    m_Instance = instance;
     pickPhysicalDevice(instance);
 }
 
@@ -79,6 +80,40 @@ void VulkanPhysicalDevice::findQueueFamilyIndicies(QueueFamilyIndicies* indicies
             }
         }
     }
+    std::vector<VkQueueFamilyProperties> queueProps = getQueueFamilyProps();
+
+    std::vector<VkBool32> supportsPresent(queueProps.size());
+    for (u32 i = 0; i < queueProps.size(); i++) {
+        vkGetPhysicalDeviceSurfaceSupportKHR(m_Physical, i, Application::getVulkanContext().getSurface(), &supportsPresent[i]);
+    }
+
+    uint32_t graphicsQueueNodeIndex = UINT32_MAX;
+    uint32_t presentQueueNodeIndex = UINT32_MAX;
+    for (uint32_t i = 0; i < queueProps.size(); i++) {
+        if ((queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
+            if (graphicsQueueNodeIndex == UINT32_MAX) {
+                graphicsQueueNodeIndex = i;
+            }
+
+            if (supportsPresent[i] == VK_TRUE) {
+                graphicsQueueNodeIndex = i;
+                presentQueueNodeIndex = i;
+                break;
+            }
+        }
+    }
+    if (presentQueueNodeIndex == UINT32_MAX) {
+        for (uint32_t i = 0; i < queueProps.size(); ++i) {
+            if (supportsPresent[i] == VK_TRUE) {
+                presentQueueNodeIndex = i;
+                break;
+            }
+        }
+    }
+
+    VKE_ASSERT(graphicsQueueNodeIndex != UINT32_MAX);
+    VKE_ASSERT(presentQueueNodeIndex != UINT32_MAX);
+    setPresentQueue(presentQueueNodeIndex);
 }
 
 void VulkanPhysicalDevice::setPresentQueue(u32 index)

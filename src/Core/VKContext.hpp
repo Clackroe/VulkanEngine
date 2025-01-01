@@ -30,6 +30,8 @@ public:
 
     VkInstance& getVulkanInstance() { return m_VulkanInstance; }
     VulkanPhysicalDevice& getPhysicalDevice() { return *m_PhysicalDevice; }
+    VulkanDevice& getDevice() { return *m_Device; }
+    VkSurfaceKHR getSurface() { return m_Surface; };
 
     void update();
 
@@ -53,6 +55,8 @@ private:
 
     // Swapchain
     Ref<VulkanSwapchain> m_Swapchain = nullptr;
+    VkSurfaceKHR m_Surface;
+
     //
     // Device
 };

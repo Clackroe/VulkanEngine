@@ -38,6 +38,8 @@ private:
 private:
     VkPhysicalDevice m_Physical = VK_NULL_HANDLE;
 
+    VkInstance m_Instance;
+
     VkPhysicalDeviceProperties m_DeviceProps;
     VkPhysicalDeviceFeatures m_DeviceFeatures;
 
@@ -51,6 +53,9 @@ public:
     ~VulkanDevice();
 
     const Ref<VulkanPhysicalDevice> getPhysicalDevice() const { return m_Physical; }
+    VkDevice getVulkanDevice() { return m_Device; }
+    const VkDevice getVulkanDevice() const { return m_Device; }
+
     const VkPhysicalDeviceProperties& getDeviceProps() const { return m_Physical->getProps(); }
     const VkPhysicalDeviceFeatures& getDeviceFeats() const { return m_Physical->getFeats(); }
 

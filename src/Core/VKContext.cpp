@@ -1,3 +1,4 @@
+#include "Core/Application.hpp"
 #include "Core/VKDevice.hpp"
 #include "Core/VKSwapChain.hpp"
 #include "GLFW/glfw3.h"
@@ -123,8 +124,8 @@ void VKContext::init()
     createInstance();
     setupValidationMsger();
     m_PhysicalDevice = CreateRef<VulkanPhysicalDevice>(m_VulkanInstance);
-    m_Swapchain = CreateRef<VulkanSwapchain>(m_VulkanInstance);
     m_Device = CreateRef<VulkanDevice>(m_PhysicalDevice);
+    m_Swapchain = CreateRef<VulkanSwapchain>(m_VulkanInstance);
     VKE_INFO("Context Initialized");
 }
 
@@ -186,6 +187,11 @@ void VKContext::createInstance()
     VKContext::pushCleanupFunc([&]() {
         vkDestroyInstance(m_VulkanInstance, nullptr);
     });
+
+    // ====== SURFACE =====
+    VkResult res = glfwCreateWindowSurface(m_VulkanInstance, Application::getApp()->getWindow().getGLFW(), nullptr, &m_Surface);
+    VKE_ASSERT(res == VK_SUCCESS, "Failed to create glfw surface")
+    VKE_INFO("Created Vulkan/GLFW Surface")
 }
 
 void VKContext::setupValidationMsger()
